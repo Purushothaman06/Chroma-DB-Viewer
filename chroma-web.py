@@ -1,1 +1,0 @@
-# Chroma Web Viewer for ChromaDB

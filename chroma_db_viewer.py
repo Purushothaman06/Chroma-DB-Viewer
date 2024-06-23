@@ -26,37 +26,37 @@ def create_client(host: str, port: int) -> db.HttpClient:
         port: The port number of the server.
 
     Returns:
-        HttpClient: A new HttpClient object.
+        db.HttpClient: A new HttpClient object.
     """
-    return db.HttpClient(host, port)
+    return db.HttpClient(host=host, port=port)
 
 
-def style_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+def style_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
     Styles a DataFrame by highlighting the maximum value in each column.
 
     Args:
-        dataframe: The DataFrame to style.
+        df: The DataFrame to style.
 
     Returns:
         pd.Styler: The styled DataFrame.
     """
-    return dataframe.style.highlight_max(
-        axis=0, props="background-color: white; color: black; border-color: black"
+    return df.style.highlight_max(
+        axis=0,
+        props="background-color: white; color: black; border-color: black"
     )
 
 
-def parse_database_url(db_url: str) -> ParseResult:
-    """
-    Parses the database URL to extract the host and port.
+def parse_database_url(database_url: str) -> ParseResult:
+    """Parse the database URL and return the components.
 
     Args:
-        db_url: The database URL.
+        database_url: The URL of the database.
 
     Returns:
-        ParseResult: The parsed URL components.
+        The parsed URL components.
     """
-    return urlparse(db_url)
+    return urlparse(database_url)
 
 
 def connect_and_list_collections(client: db.HttpClient) -> None:
@@ -103,7 +103,7 @@ def connect_and_list_collections(client: db.HttpClient) -> None:
 
 def view_chroma_db() -> None:
     """
-    Main function to view Chroma DB collections in Streamlit.
+    Main function to view and delete Chroma DB collections in Streamlit.
 
     Returns:
         None
@@ -113,6 +113,7 @@ def view_chroma_db() -> None:
     # Input field for the database URL in the sidebar
     db_url = st.sidebar.text_input("Database URL")
     connect_button = st.sidebar.button("Connect")
+    delete_button = st.sidebar.button("Delete")
 
     if connect_button and db_url:
         parsed_url = parse_database_url(db_url)
@@ -123,6 +124,18 @@ def view_chroma_db() -> None:
             st.markdown(f"### Connecting to {host}:{port}")
             client = create_client(host, port)
             connect_and_list_collections(client)
+        else:
+            st.error("Invalid URL. Please enter a valid database URL.")
+
+    if delete_button and db_url:
+        parsed_url = parse_database_url(db_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+
+        if host and port:
+            client = create_client(host, port)
+            for collection in client.list_collections():
+                client.delete_collection(collection.name)
         else:
             st.error("Invalid URL. Please enter a valid database URL.")
 

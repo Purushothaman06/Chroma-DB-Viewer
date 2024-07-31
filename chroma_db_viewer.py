@@ -16,7 +16,6 @@ from urllib.parse import urlparse, ParseResult
 
 pd.set_option("display.max_columns", 4)
 
-
 def create_client(host: str, port: int) -> db.HttpClient:
     """
     Creates a new HttpClient object with the given host and port.
